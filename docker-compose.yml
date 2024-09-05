@@ -1,0 +1,79 @@
+
+version: '3.8'
+
+services:
+  sql1:
+    image: mysql:latest
+    container_name: sql1
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - ./mysql-config/my.cnf:/etc/mysql/my.cnf
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+
+  sql2:
+    image: mysql:latest
+    container_name: sql2
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - ./mysql-config/my.cnf:/etc/mysql/my.cnf
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3307:3306"
+
+  load_test:
+    build: ./load_test
+    container_name: load_test
+    depends_on:
+      - sql1
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  monitor:
+    build: ./monitor
+    container_name: monitor
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker_metrics.csv:/home/ec2-user/new-project-docker/docker_metrics.csv
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  traffic_switch:
+    build: ./traffic_switch
+    container_name: traffic_switch
+    depends_on:
+      - monitor
+    volumes:
+      - ./failover_history.txt:/home/ec2-user/new-project-docker/failover_history.txt
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Mount the nginx configuration file
+    ports:
+      - "3306:3306"  # NGINX listens on port 3306
+    networks:
+      - default
+    depends_on:
+      - sql1
+      - sql2
+
+networks:
+  default:
+    driver: bridge
+
