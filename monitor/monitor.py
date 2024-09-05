@@ -10,7 +10,7 @@ client = docker.from_env()
 # File to store metrics
 CSV_FILE = '/home/ec2-user/project-docker/docker_metrics.csv'
 
-# Database connection details for sql1 and sql2
+#Connecting to the db instance sql1 and sql2
 sql1_db_config = {
     'user': 'root',
     'password': 'root_password',

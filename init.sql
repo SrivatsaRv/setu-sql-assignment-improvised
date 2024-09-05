@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) NOT NULL
 );
 
--- Grant full root permissions
+-- Grant full root permissions - Did this again - because of access issues running on my WSL2 container
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 
 -- Flush privileges to make sure changes take effect

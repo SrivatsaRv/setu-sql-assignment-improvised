@@ -3,7 +3,7 @@ import time
 import random
 import string
 
-# Database connection details
+#Connecting to the db instance sql1 
 db_config = {
     'user': 'root',
     'password': 'root_password',
